@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Birthday Reminder</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px 0; }
+        button:hover { background: #0056b3; }
+        .toast { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        #toasts { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🎂 Student Birthday Reminder</h1>
+    <p>Check for student birthdays today!</p>
+    
+    <button onclick="checkBirthdays()">Check Birthdays Now</button>
+    
+    <div id="toasts"></div>
+
+    <script>
+        function showToast(message, isError = false) {
+            const toastsDiv = document.getElementById('toasts');
+            const toast = document.createElement('div');
+            toast.className = isError ? 'toast error' : 'toast';
+            toast.textContent = message;
+            toastsDiv.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function checkBirthdays() {
+            fetch('/check-today')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(birthdays => {
+                    if (birthdays.length === 0) {
+                        showToast('No birthdays today!');
+                    } else {
+                        birthdays.forEach(student => {
+                            const message = `🎉 It's ${student.name}'s birthday today! (DOB: ${student.dob})`;
+                            showToast(message);
+                            alert(message);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error checking birthdays. Make sure the server is running.', true);
+                });
+        }
+
+        // Check birthdays on page load
+        window.onload = checkBirthdays;
+    </script>
+</body>
+</html>
